@@ -59,4 +59,9 @@ config BT_NAME
 		Bluetooth name exposed by the device.
    depends on BT_SPEAKER_MODE
 
+menuconfig SLIMPROTO_MODE
+    bool "Slimproto Mode"
+    help
+       Select this option to turn on squeezebox support.
+
 endmenu

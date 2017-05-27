@@ -23,9 +23,8 @@
 #include "slimproto.h"
 #include "stream.h"
 #include "my_little_radio.h"
-#include "log.h"
-#include "vs1053.h"
 #include "math.h"
+#include "log.h"
 
 LOG_DOMAIN("slimproto")
 
@@ -59,7 +58,8 @@ short server_port = PORT;
 int sock = -1;
 bool sentSTMu, sentSTMo, sentSTMl;
 static in_addr_t slimproto_ip = 0;
-
+extern EventGroupHandle_t wifi_event_group;
+static nvs_handle slimproto_nvs_handle;
 // clock
 u32_t gettime_ms(void) {
      struct timeval tv;
@@ -379,8 +379,13 @@ static void _process_strm(u8_t *pkt, int len)
           /* 	stream_file(header, header_len, strm->threshold * 1024); */
           /* 	autostart -= 2; */
           /* } else { */
-          stream_start(ip, port, header, header_len);
+
+          //stream_start(ip, port, header, header_len);
+          
           /* } */
+
+          
+          
           sendSTAT("STMc", 0);
           sentSTMu = sentSTMo = sentSTMl = false;
           //output.threshold = strm->output_threshold;
@@ -437,8 +442,6 @@ static void _process_audg(u8_t *pkt, int len)
 
      DBG("vol %3.3f", vol);
      
-     //vs1053_volume_set(voll, volr);
-
      DBG("Volume : %ul %ul | adjust : %ul | preamp %ul", voll, volr,
          audg->adjust, audg->preamp);
      DBG("Volume dB: %3.3f %3.3f %3.3f %3.3f\n", fvoll, fvolr, ldb, rdb);
@@ -466,9 +469,9 @@ static void _process_setd(u8_t *pkt, int len)
                player_name[PLAYER_NAME_LEN] = '\0';
                DBG("set name: %s\n", setd->data);
 
-               nvs_set_blob(mlr_nvs_handle, "player_name",
+               nvs_set_blob(slimproto_nvs_handle, "player_name",
                             player_name, strlen(player_name));
-               nvs_commit(mlr_nvs_handle);
+               nvs_commit(slimproto_nvs_handle);
                /* confirm change to server */
                sendSETDName(setd->data);
                
@@ -519,9 +522,16 @@ void slimproto_task(void *pvParameter)
      esp_err_t err;
 
      DBG("Starting slimproto_task");
+
+     err = nvs_open("slimproto", NVS_READWRITE, &slimproto_nvs_handle);
+     if (err != ESP_OK)
+     {
+         ERR("Error (%d) opening NVS!\n", err);
+     }
+
      
      size_t player_name_size = 0;
-     err = nvs_get_blob(mlr_nvs_handle, "player_name", NULL, &player_name_size);
+     err = nvs_get_blob(slimproto_nvs_handle, "player_name", NULL, &player_name_size);
      if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND)
      {
           ERR("Unable to read player_name from NVS");
@@ -531,7 +541,7 @@ void slimproto_task(void *pvParameter)
            // Read previously saved blob if available
           if ((player_name_size > 0) && (player_name_size < PLAYER_NAME_LEN))
           {
-               err = nvs_get_blob(mlr_nvs_handle, "player_name", player_name, &player_name_size);
+               err = nvs_get_blob(slimproto_nvs_handle, "player_name", player_name, &player_name_size);
                if (err != ESP_OK)
                {
                     ERR("Error retrieving player_name from nvs");
@@ -547,7 +557,7 @@ void slimproto_task(void *pvParameter)
      
      while(1)
      {
-          xEventGroupWaitBits(mlr_wifi_event_group, CONNECTED_BIT,
+          xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT,
                               false, true, portMAX_DELAY);
 
           DBG("Connected. Launching discovery server");
@@ -606,3 +616,9 @@ void slimproto_task(void *pvParameter)
      }
 }
 
+void slimproto_start(void)
+{
+    DBG("Slimproto Start\n");
+    xTaskCreatePinnedToCore(&slimproto_task, "slimproto_task", 2560, NULL, 20,
+                            NULL, 0);
+}

@@ -26,8 +26,9 @@
 #ifdef CONFIG_BT_SPEAKER_MODE
 #include "bt_speaker.h"
 #endif
-#include "playlist.h"
-
+#ifdef CONFIG_SLIMPROTO_MODE
+#include "slimproto.h"
+#endif
 
 #define WIFI_LIST_NUM   10
 
@@ -40,6 +41,7 @@
 #define PRIO_MQTT configMAX_PRIORITIES - 3
 #define PRIO_CONNECT configMAX_PRIORITIES -1
 
+EventGroupHandle_t wifi_event_group;
 
 
 static void init_hardware()
@@ -64,7 +66,7 @@ static void start_wifi()
     ESP_LOGI(TAG, "starting network");
 
     /* FreeRTOS event group to signal when we are connected & ready to make a request */
-    EventGroupHandle_t wifi_event_group = xEventGroupCreate();
+    wifi_event_group = xEventGroupCreate();
 
     /* init wifi */
     ui_queue_event(UI_CONNECTING);
@@ -140,6 +142,12 @@ void app_main()
 #else
     start_wifi();
     start_web_radio();
+#endif
+
+#ifdef CONFIG_SLIMPROTO_MODE
+    start_wifi();
+    start_web_radio();
+    slimproto_start();
 #endif
 
     ESP_LOGI(TAG, "RAM left %d", esp_get_free_heap_size());

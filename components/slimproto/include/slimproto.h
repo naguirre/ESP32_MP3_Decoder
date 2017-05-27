@@ -179,5 +179,5 @@ struct codc_packet {
 };
 
 void slimproto_task(void *pvParameter);
-
+void slimproto_start(void);
 

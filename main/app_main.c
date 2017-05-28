@@ -29,6 +29,7 @@
 #ifdef CONFIG_SLIMPROTO_MODE
 #include "slimproto.h"
 #endif
+#include "ssl_client.h"
 
 #define WIFI_LIST_NUM   10
 
@@ -150,6 +151,10 @@ void app_main()
     slimproto_start();
 #endif
 
+    char buf[512];
+    //https_get("enna.me", 443, "/mylittleradio", buf, sizeof(buf));
+    //printf("Buffer received : %s\n", buf);
+    
     ESP_LOGI(TAG, "RAM left %d", esp_get_free_heap_size());
     // ESP_LOGI(TAG, "app_main stack: %d\n", uxTaskGetStackHighWaterMark(NULL));
 }

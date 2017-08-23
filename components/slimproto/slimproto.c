@@ -81,12 +81,12 @@ void packn(u16_t *dest, u16_t val) {
 u32_t unpackN(u32_t *src) {
      u8_t *ptr = (u8_t *)src;
      return *(ptr) << 24 | *(ptr+1) << 16 | *(ptr+2) << 8 | *(ptr+3);
-} 
+}
 
 u16_t unpackn(u16_t *src) {
      u8_t *ptr = (u8_t *)src;
      return *(ptr) << 8 | *(ptr+1);
-} 
+}
 
 
 static int _discover_server(void)
@@ -167,7 +167,7 @@ static void _send_helo()
      struct HELO_packet pkt;
 
      DBG("Send Helo");
-     
+
      memset(&pkt, 0, sizeof(pkt));
      memcpy(&pkt.opcode, "HELO", 4);
      pkt.length = htonl(sizeof(struct HELO_packet) - 8 + strlen(base_cap));
@@ -176,9 +176,9 @@ static void _send_helo()
      packn(&pkt.wlan_channellist, 0x4000);
      packN(&pkt.bytes_received_H, (u64_t)status.stream_bytes >> 32);
      packN(&pkt.bytes_received_L, (u64_t)status.stream_bytes & 0xffffffff);
-  
+
      esp_wifi_get_mac(0, pkt.mac);
-  
+
      DBG("mac: %02x:%02x:%02x:%02x:%02x:%02x", pkt.mac[0], pkt.mac[1], pkt.mac[2], pkt.mac[3], pkt.mac[4], pkt.mac[5]);
 
      DBG("cap: %s", base_cap);
@@ -189,15 +189,15 @@ static void _send_helo()
 
 static void sendSETDName(const char *name) {
      struct SETD_header pkt_header;
-  
+
      memset(&pkt_header, 0, sizeof(pkt_header));
      memcpy(&pkt_header.opcode, "SETD", 4);
-  
+
      pkt_header.id = 0; // id 0 is playername S:P:Squeezebox2
      pkt_header.length = htonl(sizeof(pkt_header) + strlen(name) + 1 - 8);
-  
+
      printf("set playername: %s\n", name);
-  
+
      _send_packet((u8_t *)&pkt_header, sizeof(pkt_header));
      _send_packet((u8_t *)name, strlen(name) + 1);
 }
@@ -217,7 +217,7 @@ static void sendSTAT(const char *event, u32_t server_timestamp) {
           DBG("ms_played: 0");
           ms_played = 0;
      }
-	
+
      memset(&pkt, 0, sizeof(struct STAT_packet));
      memcpy(&pkt.opcode, "STAT", 4);
      pkt.length = htonl(sizeof(struct STAT_packet) - 8);
@@ -241,7 +241,7 @@ static void sendSTAT(const char *event, u32_t server_timestamp) {
      /* printf("received bytesL: %u streambuf: %u outputbuf: %u calc elapsed: %u real elapsed: %u (diff: %d) device: %u delay: %d\n", */
      /*        (u32_t)status.stream_bytes, status.stream_full, status.output_full, ms_played, now - status.stream_start, */
      /*        ms_played - now + status.stream_start, status.device_frames * 1000 / status.current_sample_rate, now - status.updated); */
-	
+
 
      _send_packet((u8_t *)&pkt, sizeof(pkt));
 }
@@ -251,13 +251,13 @@ static int _connect_to_server(void)
 {
      DBG("start tcp client");
      sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  
+
      DBG("socket: rc: %d", sock);
      struct sockaddr_in serverAddress;
      serverAddress.sin_family = AF_INET;
      inet_pton(AF_INET, server_ip, &serverAddress.sin_addr.s_addr);
      serverAddress.sin_port = htons(server_port);
-  
+
      int rc = connect(sock, (struct sockaddr *)&serverAddress, sizeof(struct sockaddr_in));
      DBG("connect rc: %d", rc);
      return rc;
@@ -340,11 +340,11 @@ static void _process_strm(u8_t *pkt, int len)
           char *header = (char *)(pkt + sizeof(struct strm_packet));
           in_addr_t ip = (in_addr_t)strm->server_ip; // keep in network byte order
           u16_t port = strm->server_port; // keep in network byte order
-          if (ip == 0) ip = slimproto_ip; 
+          if (ip == 0) ip = slimproto_ip;
 
-          DBG("Stream start :\nautostart: %c transition period: %u transition type: %u codec: %c\n", 
+          DBG("Stream start :\nautostart: %c transition period: %u transition type: %u codec: %c\n",
                  strm->autostart, strm->transition_period, strm->transition_type - '0', strm->format);
-			
+
           //autostart = strm->autostart - '0';
 #if GPIO
           ampidle = 0;
@@ -363,7 +363,7 @@ static void _process_strm(u8_t *pkt, int len)
                    strm->pcm_sample_rate,
                    strm->pcm_channels,
                    strm->pcm_endianness);
-                   
+
                //codec_open(strm->format, strm->pcm_sample_size, strm->pcm_sample_rate, strm->pcm_channels, strm->pcm_endianness);
           } /* else if (autostart >= 2) { */
           /* 	// extension to slimproto to allow server to detect codec from response header and send back in codc message */
@@ -381,11 +381,11 @@ static void _process_strm(u8_t *pkt, int len)
           /* } else { */
 
           //stream_start(ip, port, header, header_len);
-          
+
           /* } */
 
-          
-          
+
+
           sendSTAT("STMc", 0);
           sentSTMu = sentSTMo = sentSTMl = false;
           //output.threshold = strm->output_threshold;
@@ -416,7 +416,7 @@ static void _process_codc(u8_t *pkt, int len)
 
 static void _process_aude(u8_t *pkt, int len)
 {
-     DBG("Process aude"); 
+     DBG("Process aude");
 }
 
 static void _process_audg(u8_t *pkt, int len)
@@ -430,9 +430,9 @@ static void _process_audg(u8_t *pkt, int len)
 
      fvoll = voll / 65536.0;
      fvolr = volr / 65536.0;
-     
-     ldb = 20 * log10(voll); 
-     rdb = 20 * log10(volr); 
+
+     ldb = 20 * log10(voll);
+     rdb = 20 * log10(volr);
 
      float vol;
      if (ldb > -30 && ldb <= 0)
@@ -441,7 +441,7 @@ static void _process_audg(u8_t *pkt, int len)
        vol = voll * (1 << 16) + 0.5;
 
      DBG("vol %3.3f", vol);
-     
+
      DBG("Volume : %ul %ul | adjust : %ul | preamp %ul", voll, volr,
          audg->adjust, audg->preamp);
      DBG("Volume dB: %3.3f %3.3f %3.3f %3.3f\n", fvoll, fvolr, ldb, rdb);
@@ -474,7 +474,7 @@ static void _process_setd(u8_t *pkt, int len)
                nvs_commit(slimproto_nvs_handle);
                /* confirm change to server */
                sendSETDName(setd->data);
-               
+
           }
      }
 
@@ -529,7 +529,7 @@ void slimproto_task(void *pvParameter)
          ERR("Error (%d) opening NVS!\n", err);
      }
 
-     
+
      size_t player_name_size = 0;
      err = nvs_get_blob(slimproto_nvs_handle, "player_name", NULL, &player_name_size);
      if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND)
@@ -554,7 +554,7 @@ void slimproto_task(void *pvParameter)
      }
 
      DBG("Player name : %s", player_name);
-     
+
      while(1)
      {
           xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT,
@@ -567,7 +567,7 @@ void slimproto_task(void *pvParameter)
           _connect_to_server();
 
           _send_helo();
-  
+
           while(1)
           {
                if (expect > 0)
@@ -619,6 +619,6 @@ void slimproto_task(void *pvParameter)
 void slimproto_start(void)
 {
     DBG("Slimproto Start\n");
-    xTaskCreatePinnedToCore(&slimproto_task, "slimproto_task", 2560, NULL, 20,
+    xTaskCreatePinnedToCore(&slimproto_task, "slimproto_task", 2560, NULL, configMAX_PRIORITIES - 3,
                             NULL, 0);
 }

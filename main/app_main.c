@@ -138,23 +138,34 @@ void app_main()
 
     init_hardware();
 
-#ifdef CONFIG_BT_SPEAKER_MODE
-    bt_speaker_start(create_renderer_config());
-#else
-    start_wifi();
-    start_web_radio();
-#endif
+// #ifdef CONFIG_BT_SPEAKER_MODE
+//     //bt_speaker_start(create_renderer_config());
+// #else
+//     start_wifi();
+//     start_web_radio();
+// #endif
 
-#ifdef CONFIG_SLIMPROTO_MODE
+int wifi = 1;
+int bluetooth = 0;
+
+//#ifdef CONFIG_SLIMPROTO_MODE
+if (wifi == 1)
+{
+    //bt_speaker_start(create_renderer_config());
     start_wifi();
     start_web_radio();
     slimproto_start();
-#endif
+}
+else if (bluetooth == 1)
+{
+    bt_speaker_start(create_renderer_config());
+}
+//#endif
 
-    char buf[512];
+    //char buf[512];
     //https_get("enna.me", 443, "/mylittleradio", buf, sizeof(buf));
     //printf("Buffer received : %s\n", buf);
-    
+
     ESP_LOGI(TAG, "RAM left %d", esp_get_free_heap_size());
     // ESP_LOGI(TAG, "app_main stack: %d\n", uxTaskGetStackHighWaterMark(NULL));
 }

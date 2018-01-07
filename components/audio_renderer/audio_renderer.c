@@ -76,7 +76,7 @@ static void init_i2s(renderer_config_t *config)
     i2s_pin_config_t pin_config = {
             .bck_io_num = GPIO_NUM_26,
             .ws_io_num = GPIO_NUM_25,
-            .data_out_num = GPIO_NUM_22,
+            .data_out_num = GPIO_NUM_27,
             .data_in_num = I2S_PIN_NO_CHANGE
     };
 
@@ -280,4 +280,3 @@ void renderer_destroy()
     renderer_status = UNINITIALIZED;
     i2s_driver_uninstall(renderer_instance->i2s_num);
 }
-

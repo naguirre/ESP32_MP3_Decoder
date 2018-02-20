@@ -1,3 +1,6 @@
 [submodule "components/inih_port/inih"]
 	path = components/inih_port/inih
 	url = https://github.com/benhoyt/inih.git
+[submodule "components/squeezelite/squeezelite"]
+	path = components/squeezelite/squeezelite
+	url = http://github.com/ralph-irving/squeezelite.git
